@@ -1,6 +1,9 @@
 package com.example.tabsyncedrecylerview;
 
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> tabsCat = new ArrayList<>();
     private ArrayList<Object> list = new ArrayList<>();
     private MyAdapter myAdapter;
-    private Boolean isUserScrolling = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,20 +45,6 @@ public class MainActivity extends AppCompatActivity {
         myRecyclerView.setAdapter(myAdapter);
 
         myRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    isUserScrolling = true;
-                }
-                else {
-                    if (linearLayoutManager.findLastCompletelyVisibleItemPosition() + 1 == list.size()
-                            || linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0)
-                        isUserScrolling = false;
-                }
-            }
-
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -87,33 +75,20 @@ public class MainActivity extends AppCompatActivity {
             myTabLayout.addTab(firstTab);
         }
 
-        myTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                if (!isUserScrolling) {
-                    String tabText = tab.getText().toString();
-                    for (int i = 0; i < list.size(); i++) {
-                        if (list.get(i) instanceof HeaderModel) {
-                            HeaderModel headerModel = (HeaderModel) list.get(i);
-                            if (tabText.equalsIgnoreCase(headerModel.getHeader())) {
-                                linearLayoutManager.scrollToPositionWithOffset(i, 0);
-                            }
+        for (int tabCount = 0; tabCount < myTabLayout.getTabCount(); tabCount++) {
+            View tabView = ((ViewGroup) myTabLayout.getChildAt(0)).getChildAt(tabCount);
+            final String tabText = tabsCat.get(tabCount);
+            tabView.setOnClickListener(v -> {
+                for (int i = 0; i < list.size(); i++) {
+                    if (list.get(i) instanceof HeaderModel) {
+                        HeaderModel headerModel = (HeaderModel) list.get(i);
+                        if (tabText.equalsIgnoreCase(headerModel.getHeader())) {
+                            linearLayoutManager.scrollToPositionWithOffset(i, 0);
                         }
                     }
                 }
-                isUserScrolling = false;
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
+            });
+        }
     }
 
     private void initView() {
